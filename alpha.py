@@ -1,128 +1,133 @@
+# Antoni Rumowski 193087 Marek Marcinko 197870
+
 import numpy as np
 import matplotlib
-import sympy as sp
 import control as ct
 
 print("Imports complete.")
 print("NumPy version:", np.__version__)
 print("Matplotlib version:", matplotlib.__version__)
-print("SymPy version:", sp.__version__)
 print("Control version:", ct.__version__)
 input("Press Enter to continue...")
 
 is_stable = True
-next_element = [(2,0), (2,1), (3,0), (4,0)]
-unstable_roots = 0
-boundary_roots = 0
-is_negative = False
-x = sp.symbols('x')
-row_coeffs = {
-    0:x**4,
-    1:x**3,
-    2:x**2,
-    3:x**1,
-    4:x**0
-}
 
 # input coefficients
 
-tran_L = float(input("b0: "))
-print(tran_L)
+tran_numerator = float(input("b0: "))
 a3  = float(input("a3: "))
 a2 = float(input("a2: "))
 a1 = float(input("a1: "))
 a0 = float(input("a0: "))
 print("s**4 +", a3, "* s**3+", a2, "* s**2+", a1, "* s+", a0)
-tran_M = [1, a3, a2, a1, a0]
+tran_denominator = [1, a3, a2, a1, a0]
 
-#define the function to calculate the next element of the table
+def bode_plot(G):
+    mag, phase, omega = ct.bode(G, plot=False)
+    matplotlib.pyplot.figure()
+    matplotlib.pyplot.subplot(2, 1, 1)
+    matplotlib.pyplot.semilogx(omega, 20 * np.log10(mag))  # logarytmiczna skala częstotliwości
+    matplotlib.pyplot.title('Bode Plot')
+    matplotlib.pyplot.ylabel('Magnitude (dB)')
+    matplotlib.pyplot.grid(True)
 
-#limit_result = sp.limit(f, x, 0, dir='+')
+    matplotlib.pyplot.subplot(2, 1, 2)
+    matplotlib.pyplot.semilogx(omega, np.degrees(phase))
+    matplotlib.pyplot.xlabel('Frequency (rad/s)')
+    matplotlib.pyplot.ylabel('Phase (deg)')
+    matplotlib.pyplot.grid(True)
 
-def calc_next_element(tab, element):
-    if element[1] != 1:
-        rows = [element[0]-2, element[0]-1]
-        cols = [element[1], element[1]+1]
+    matplotlib.pyplot.tight_layout()
+    matplotlib.pyplot.savefig("bode_plot.png")
+    matplotlib.pyplot.close()
+    print("Bode plot complete.")
+
+def step_response(G):
+    t = np.linspace(0, 10, 1000)  # czas
+    t_out, y_out = ct.step_response(G, T=t)
+
+    matplotlib.pyplot.figure()
+    matplotlib.pyplot.plot(t_out, y_out, label="y(t) – step response")
+    matplotlib.pyplot.plot(t_out, np.ones_like(t_out), '--', label="u(t) – unit step")
+    matplotlib.pyplot.xlabel("Time [s]")
+    matplotlib.pyplot.ylabel("Amplitude")
+    matplotlib.pyplot.legend()
+    matplotlib.pyplot.grid()
+    matplotlib.pyplot.title("Step response of the system")
+    matplotlib.pyplot.savefig("step_response.png")
+    matplotlib.pyplot.close()
+    print("Step response complete.")
+
+def sine_response(G):
+    w = 1.0  # częstotliwość sinusa
+    t = np.linspace(0, 20, 1000)
+    u = np.sin(w * t)
+
+    t_out, y_out = ct.forced_response(G, T=t, U=u)
+
+    matplotlib.pyplot.figure()
+    matplotlib.pyplot.plot(t_out, u, '--', label="u(t) – sine input")
+    matplotlib.pyplot.plot(t_out, y_out, label="y(t) – system response")
+    matplotlib.pyplot.xlabel("Time [s]")
+    matplotlib.pyplot.ylabel("Amplitude")
+    matplotlib.pyplot.legend()
+    matplotlib.pyplot.grid()
+    matplotlib.pyplot.title("System response to sine input")
+    matplotlib.pyplot.savefig("sine_response.png")
+    matplotlib.pyplot.close()
+    print("Sine response complete.")
+
+def check_stability(tab):
+    rows2 = [0,1]
+    cols2 = [0,1]
+    matrix2 = tab[np.ix_(rows2, cols2)]
+
+    test2 = np.linalg.det(matrix2)
+
+    rows3 = [0,1,2]
+    cols3 = [0,1,2]
+    matrix3 = tab[np.ix_(rows3, cols3)]
+
+    test3 = np.linalg.det(matrix3)
+    test4 = np.linalg.det(tab)
+
+    print("Matrix 2x2:", matrix2)
+    print("Matrix 3x3:", matrix3)
+    if test2 <= 0 or test3 <= 0 or test4 <= 0:
+        return False
     else:
-        rows = [element[0]-2, element[0]-1]
-        cols = [element[1]-1, element[1]+1]
-
-    det_matrix = tab[np.ix_(rows, cols)]
-    if det_matrix[1][0] == 0 and det_matrix[1][1] != 0:
-        det_function = (det_matrix[0][0]*det_matrix[1][1]) - (det_matrix[0][1]*x)
-        det = det_function / (-x)
-        det = sp.limit(det_function, x, 0, dir='+')
-
-
-    # TODO: check for zero row , derivative of the polynomial of the row above, coefficients in place of the zeros, roots of the polynomial
-    elif det_matrix[1][0] == 0 and det_matrix[1][1] == 0 and det_matrix[0][1] != 0:
-        if element[0] == 0:
-            poly = element[0][0] * row_coeffs.get(element[0]) + element[0][1] * (row_coeffs.get(element[0]+2)) + element[0][2] * (row_coeffs.get(element[0]+4))
-        else:
-            poly = element[0][0] * row_coeffs.get(element[0]) + element[0][1] * (row_coeffs.get(element[0]+2))
-        deriv = sp.diff(poly, x)
-        sp.Poly(deriv, x)
-        coeffs = sp.Poly(deriv, x).all_coeffs()
-        coeffs = [float(i) for i in coeffs]
-        det_matrix[1][0] = coeffs[0]
-        det_matrix[1][1] = coeffs[1]
-        det = np.linalg.det(det_matrix)
-        det = det / (-det_matrix[1][0])
-        roots = sp.all_roots(deriv, x) 
-        for i in roots:
-            if np.real(i) > 0:
-                unstable_roots += 1
-                is_stable = False
-            elif np.real(i) == 0 and np.imag(i) != 0:
-                is_stable = False
-                boundary_roots += 1
-    else:
-        det = np.linalg.det(det_matrix)
-        det = det / (-det_matrix[1][0])
-    return det
-
+        return True
+    
 #check for negative coefficients in the characteristic polynomial
 
-for nums in tran_M:
+for nums in tran_denominator:
     if nums < 0:
         is_stable = False
         print("The system is unstable, cannot simulate the output.")
         break
 
-det1, det2, det3, det4 = 0, 0, 0, 0
-dets = [det1, det2, det3, det4]
+tab_hurwitz = np.array([[a3,a1,0,0],
+                     [1,a2,a0,0],
+                     [0,a3,a1,0],
+                     [0,1,a2,a0]])
+print(tab_hurwitz)
+is_stable = check_stability(tab_hurwitz)
+G = ct.TransferFunction([tran_numerator], tran_denominator)
+print("Transfer function:", G)
 
-tab_routh = np.array([[1, a2, a0],
-                     [a3,a1,0],
-                     [dets[0], dets[1], 0],
-                     [dets[2], 0, 0],
-                     [dets[3], 0, 0]])
-
-for index in range(len(next_element)):
-    dets[index] = calc_next_element(tab_routh, next_element[index])
-    tab_routh = np.array([[1, a2, a0],
-                          [a3,a1,0],
-                          [dets[0], dets[1], 0],
-                          [dets[2], 0, 0],
-                          [dets[3], 0, 0]])
-
-print(tab_routh)
-
-first_col = tab_routh[:, 0]
-print("First column:", first_col)
-for nums in range(1, len(first_col)):
-    if first_col[nums]*first_col[nums-1] < 0:
-        is_stable = False
-        unstable_roots += 1
-print("Unstable roots:", unstable_roots)
-print("Boundary roots:", boundary_roots)
-
-#the result of the Routh-Hurwitz test
+#the result of the Hurwitz test
 if is_stable:
     print("The system is stable.")
-elif unstable_roots == 0 and boundary_roots != 0:
-    print("The system is on the boundary of stability.")
 else:   
     print("The system is unstable.")
 
-    #TODO: bode plots of the function, graph of input (sine and unit step), graph of output 
+bode_plot(G)
+input("Press Enter to continue...") 
+step_response(G)
+input("Press Enter to continue...")
+sine_response(G)
+print("All tasks complete.")
+input("Press Enter to exit...")
+SystemExit(0)
+
+
