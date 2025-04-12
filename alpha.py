@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 import control as ct
 
 print("Imports complete.")
@@ -24,57 +25,57 @@ tran_denominator = [1, a3, a2, a1, a0]
 
 def bode_plot(G):
     mag, phase, omega = ct.bode(G, plot=False)
-    matplotlib.pyplot.figure()
-    matplotlib.pyplot.subplot(2, 1, 1)
-    matplotlib.pyplot.semilogx(omega, 20 * np.log10(mag))  # logarytmiczna skala częstotliwości
-    matplotlib.pyplot.title('Bode Plot')
-    matplotlib.pyplot.ylabel('Magnitude (dB)')
-    matplotlib.pyplot.grid(True)
+    plt.figure()
+    plt.subplot(2, 1, 1)
+    plt.semilogx(omega, 20 * np.log10(mag))  # log scale for frequency
+    plt.title('Bode Plot')
+    plt.ylabel('Magnitude (dB)')
+    plt.grid(True)
 
-    matplotlib.pyplot.subplot(2, 1, 2)
-    matplotlib.pyplot.semilogx(omega, np.degrees(phase))
-    matplotlib.pyplot.xlabel('Frequency (rad/s)')
-    matplotlib.pyplot.ylabel('Phase (deg)')
-    matplotlib.pyplot.grid(True)
+    plt.subplot(2, 1, 2)
+    plt.semilogx(omega, np.degrees(phase))
+    plt.xlabel('Frequency (rad/s)')
+    plt.ylabel('Phase (deg)')
+    plt.grid(True)
 
-    matplotlib.pyplot.tight_layout()
-    matplotlib.pyplot.savefig("bode_plot.png")
-    matplotlib.pyplot.close()
+    plt.tight_layout()
+    plt.savefig("bode_plot.png")
+    plt.close()
     print("Bode plot complete.")
 
 def step_response(G):
-    t = np.linspace(0, 10, 1000)  # czas
+    t = np.linspace(0, 10, 1000)  # time
     t_out, y_out = ct.step_response(G, T=t)
 
-    matplotlib.pyplot.figure()
-    matplotlib.pyplot.plot(t_out, y_out, label="y(t) – step response")
-    matplotlib.pyplot.plot(t_out, np.ones_like(t_out), '--', label="u(t) – unit step")
-    matplotlib.pyplot.xlabel("Time [s]")
-    matplotlib.pyplot.ylabel("Amplitude")
-    matplotlib.pyplot.legend()
-    matplotlib.pyplot.grid()
-    matplotlib.pyplot.title("Step response of the system")
-    matplotlib.pyplot.savefig("step_response.png")
-    matplotlib.pyplot.close()
+    plt.figure()
+    plt.plot(t_out, y_out, label="y(t) – step response")
+    plt.plot(t_out, np.ones_like(t_out), '--', label="u(t) – unit step")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Amplitude")
+    plt.legend()
+    plt.grid()
+    plt.title("Step response of the system")
+    plt.savefig("step_response.png")
+    plt.close()
     print("Step response complete.")
 
 def sine_response(G):
-    w = 1.0  # częstotliwość sinusa
+    w = 1.0  #sine frequency
     t = np.linspace(0, 20, 1000)
     u = np.sin(w * t)
 
     t_out, y_out = ct.forced_response(G, T=t, U=u)
 
-    matplotlib.pyplot.figure()
-    matplotlib.pyplot.plot(t_out, u, '--', label="u(t) – sine input")
-    matplotlib.pyplot.plot(t_out, y_out, label="y(t) – system response")
-    matplotlib.pyplot.xlabel("Time [s]")
-    matplotlib.pyplot.ylabel("Amplitude")
-    matplotlib.pyplot.legend()
-    matplotlib.pyplot.grid()
-    matplotlib.pyplot.title("System response to sine input")
-    matplotlib.pyplot.savefig("sine_response.png")
-    matplotlib.pyplot.close()
+    plt.figure()
+    plt.plot(t_out, u, '--', label="u(t) – sine input")
+    plt.plot(t_out, y_out, label="y(t) – system response")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Amplitude")
+    plt.legend()
+    plt.grid()
+    plt.title("System response to sine input")
+    plt.savefig("sine_response.png")
+    plt.close()
     print("Sine response complete.")
 
 def check_stability(tab):
