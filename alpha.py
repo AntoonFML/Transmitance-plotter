@@ -6,6 +6,9 @@ import control as ct
 print("Imports complete.")
 print("NumPy version:", np.__version__)
 print("Matplotlib version:", matplotlib.__version__)
+print("SymPy version:", sp.__version__)
+print("Control version:", ct.__version__)
+input("Press Enter to continue...")
 
 is_stable = True
 next_element = [(2,0), (2,1), (3,0), (4,0)]
@@ -46,9 +49,8 @@ def calc_next_element(tab, element):
 
     det_matrix = tab[np.ix_(rows, cols)]
     if det_matrix[1][0] == 0 and det_matrix[1][1] != 0:
-        det_matrix[1][0] = x
-        det_function = (det_matrix[0][0]*det_matrix[1][1]) - (det_matrix[0][1]*det_matrix[1][0])
-        det = det / (-det_matrix[1][0])
+        det_function = (det_matrix[0][0]*det_matrix[1][1]) - (det_matrix[0][1]*x)
+        det = det_function / (-x)
         det = sp.limit(det_function, x, 0, dir='+')
 
 
