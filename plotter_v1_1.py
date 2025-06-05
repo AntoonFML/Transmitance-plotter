@@ -16,11 +16,11 @@ M = 8 #amplitude of the sine response
 
 
 
-#print("Imports complete.")
-#print("NumPy version:", np.__version__)
-#print("Matplotlib version:", matplotlib.__version__)
-#print("Control version:", ct.__version__)
-#input("Press Enter to continue...")
+print("Imports complete.")
+print("NumPy version:", np.__version__)
+print("Matplotlib version:", matplotlib.__version__)
+print("Control version:", ct.__version__)
+input("Press Enter to continue...")
 
 is_stable = True
 
@@ -57,7 +57,7 @@ def bode_plot(numerator, denominator):
 
     plt.figure()
     plt.subplot(2, 1, 1)
-    plt.semilogx(w, 20 * np.log10(Aw))  # log scale for frequency
+    plt.semilogx(w, 20 * np.log10(Aw))
     plt.title('Bode Plot')
     plt.ylabel('Magnitude (dB)')
     plt.grid(True)
@@ -89,7 +89,7 @@ def ct_bode_plot(G):
 
     plt.figure()
     plt.subplot(2, 1, 1)
-    plt.semilogx(omega, 20 * np.log10(mag))  # log scale for frequency
+    plt.semilogx(omega, 20 * np.log10(mag)) 
     plt.title('Bode Plot')
     plt.ylabel('Magnitude (dB)')
     plt.grid(True)
@@ -159,7 +159,7 @@ def step_response(numerator, denominator):
     print("Step response complete.")
 
 def sine_response(numerator, denominator):
-        # time vector for the step response
+    # time vector for the step response
     t = np.arange(0, T, h)
     u = np.zeros_like(t)  # initialize input
     w = 2 * np.pi * L / T  # sine frequency based on the number of periods
@@ -186,7 +186,7 @@ def sine_response(numerator, denominator):
                      [0],
                      [0],
                      [0]])
-    for i in range(10000):
+    for i in range(T/h):
         us = M * np.sin(w * i * h)
         u[i] = us 
         Ax = A_matrix * xi_1
@@ -217,7 +217,7 @@ def ct_sine_response(G):
     t = np.arange(0, T, h)
     u = np.zeros_like(t)  # initialize input
     w = 2 * np.pi * L / T  # sine frequency based on the number of periods
-    for i in range(10000):
+    for i in range(T/h):
         us = M * np.sin(w * i * h)
         u[i] = us
 
